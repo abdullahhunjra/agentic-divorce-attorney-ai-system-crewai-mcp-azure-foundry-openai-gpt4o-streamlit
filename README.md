@@ -238,8 +238,8 @@ The processed, structured output is streamed back to the Streamlit interface, fo
 
 ### 1️⃣ Clone the Repository
 ``` 
-git clone https://github.com/abdullahhunjra/agentic-divorce-attorney-ai-system-crewai-mcp-ollama-streamlit.git
-cd attorney-rag
+git clone https://github.com/abdullahhunjra/agentic-divorce-attorney-ai-system-crewai-mcp-azure-foundry-openai-gpt4o-streamlit
+cd agentic-divorce-attorney-ai-system-crewai-mcp-azure-foundry-openai-gpt4o-streamlit
 ``` 
 
 2️⃣ Initialize the Environment
