@@ -1,29 +1,31 @@
 # client/divorce_attorney_client.py
 import os
+from dotenv import load_dotenv
 from crewai import Agent, Task, Crew, Process, LLM
 from crewai_tools import MCPServerAdapter
+
+load_dotenv()
 
 print("🚀 Launching UK Divorce Attorney Assistant...")
 
 # ---------------- ENVIRONMENT SETUP ---------------- #
 
-# Prevent CrewAI’s memory and Chroma from requiring OpenAI keys
-os.environ["OPENAI_API_KEY"] = "dummy"
-os.environ["CHROMA_OPENAI_API_KEY"] = "dummy"
+# Set Azure OpenAI environment variables for CrewAI/LiteLLM
+os.environ["AZURE_API_KEY"] = os.getenv("AZURE_OPENAI_API_KEY", "")
+os.environ["AZURE_API_BASE"] = os.getenv("AZURE_OPENAI_ENDPOINT", "")
+os.environ["AZURE_API_VERSION"] = os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-15-preview")
 
-# Configure LiteLLM for Ollama backend
-os.environ["LITELLM_PROVIDER"] = "ollama"
-os.environ["LITELLM_API_BASE"] = "http://127.0.0.1:11434"
-os.environ["LITELLM_MODEL"] = "llama3"
-os.environ["LITELLM_USE_CLIENT"] = "True"
+# Prevent CrewAI's memory and Chroma from requiring OpenAI keys
+os.environ["OPENAI_API_KEY"] = os.getenv("AZURE_OPENAI_API_KEY", "dummy")
+os.environ["CHROMA_OPENAI_API_KEY"] = os.getenv("AZURE_OPENAI_API_KEY", "dummy")
 
 # ---------------- LLM SETUP ---------------- #
 
 try:
     llm = LLM(
-        model="ollama/llama3",
-        base_url="http://127.0.0.1:11434",
-        api_key=None
+        model=f"azure/{os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', 'gpt-4o')}",
+        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+        base_url=os.getenv("AZURE_OPENAI_ENDPOINT"),
     )
     print("✅ LLM initialized successfully.\n")
 except Exception as e:

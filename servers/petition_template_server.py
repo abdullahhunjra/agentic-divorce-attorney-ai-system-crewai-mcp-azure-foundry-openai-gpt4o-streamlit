@@ -2,14 +2,21 @@ from fastmcp import FastMCP
 from fpdf import FPDF
 from model import DivorcePetitionData
 from pydantic import ValidationError
-from langchain_community.chat_models import ChatOllama
+from langchain_openai import AzureChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from typing import Optional
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
+
 mcp = FastMCP("PetitionTemplate")
-llm = ChatOllama(model="llama3")
+llm = AzureChatOpenAI(
+    azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+    temperature=0,
+)
 
 
 @mcp.tool()

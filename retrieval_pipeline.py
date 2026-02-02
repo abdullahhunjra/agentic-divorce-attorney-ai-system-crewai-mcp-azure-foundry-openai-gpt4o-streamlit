@@ -1,16 +1,19 @@
 # retrieval_pipeline.py
 import json
 import re
+import os
 import numpy as np
 from pathlib import Path
 from typing import List, Optional
+from dotenv import load_dotenv
 from rank_bm25 import BM25Okapi
 from sentence_transformers import SentenceTransformer, CrossEncoder
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_ollama import OllamaLLM
+from langchain_openai import AzureChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
+load_dotenv()
 
 # CONFIGURATION
 # =====================================
@@ -19,7 +22,6 @@ INDEX_DIR = Path("vector_stores/faiss_divorce_act")
 
 EMBED_MODEL = "BAAI/bge-base-en-v1.5"
 RERANKER_MODEL = "BAAI/bge-reranker-base"
-OLLAMA_MODEL = "llama3"
 
 TOP_K = 30
 ALPHA = 0.7
@@ -30,7 +32,11 @@ ALPHA = 0.7
 # =====================================
 embedder = SentenceTransformer(EMBED_MODEL)
 reranker = CrossEncoder(RERANKER_MODEL)
-llm = OllamaLLM(model=OLLAMA_MODEL)
+llm = AzureChatOpenAI(
+    azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+    temperature=0,
+)
 embeddings = HuggingFaceEmbeddings(model_name=EMBED_MODEL)
 
 with open(CHUNKS_JSON, "r", encoding="utf-8") as f:
@@ -57,7 +63,8 @@ rewrite_chain = rewrite_prompt | llm
 def rewrite_query(user_query: str) -> str:
     """Use LLM to clarify or expand the query."""
     try:
-        raw = rewrite_chain.invoke({"user_query": user_query}).strip()
+        response = rewrite_chain.invoke({"user_query": user_query})
+        raw = response.content.strip() if hasattr(response, "content") else str(response).strip()
         match = re.search(r"\{.*\}", raw, re.S)
         data = json.loads(match.group(0)) if match else {"rewritten": user_query}
         return data.get("rewritten", user_query)

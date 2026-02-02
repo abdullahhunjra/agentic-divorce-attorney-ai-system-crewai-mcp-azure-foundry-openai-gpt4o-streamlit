@@ -1,6 +1,6 @@
 from fastmcp import FastMCP
 from langchain_community.tools import TavilySearchResults
-from langchain_community.chat_models import ChatOllama
+from langchain_openai import AzureChatOpenAI
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
@@ -11,7 +11,11 @@ load_dotenv()
 
 # Initialize FastMCP and LLM
 mcp = FastMCP("CaseRetrieval")
-llm = ChatOllama(model="llama3")
+llm = AzureChatOpenAI(
+    azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+    temperature=0,
+)
 
 @mcp.tool()
 def find_similar_cases(query: str):

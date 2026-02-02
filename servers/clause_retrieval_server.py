@@ -2,16 +2,17 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-
+from dotenv import load_dotenv
 from fastmcp import FastMCP
-from langchain_ollama import ChatOllama
+from langchain_openai import AzureChatOpenAI
 from retrieval_pipeline import retrieve_relevant_chunks
 
+load_dotenv()
 
-
-llm = ChatOllama(
-    model="llama3",
-    base_url="http://127.0.0.1:11434", 
+llm = AzureChatOpenAI(
+    azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+    temperature=0,
 )
 
 mcp = FastMCP("ClauseRetrieval")

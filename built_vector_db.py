@@ -3,16 +3,18 @@ import re
 import json
 import numpy as np
 from pathlib import Path
+from dotenv import load_dotenv
 from tqdm import tqdm
 from unstructured.partition.pdf import partition_pdf
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from langchain_community.chat_models import ChatOllama
+from langchain_openai import AzureChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.schema import Document
 
+load_dotenv()
 
 # Configurations of paths and model details
 # ====================================
@@ -23,7 +25,6 @@ INDEX_DIR = Path("vector_stores/faiss_divorce_act")
 
 SEMANTIC_MODEL = "all-MiniLM-L6-v2"
 EMBED_MODEL = "BAAI/bge-base-en-v1.5"
-OLLAMA_MODEL = "llama3"
 SIMILARITY_THRESHOLD = 0.82
 
 
@@ -253,8 +254,12 @@ def hybrid_chunking_with_metadata():
     semantic_chunks = group_by_boundaries(text_blocks, boundaries)
     print(f"🧩 Created {len(semantic_chunks)} semantic chunks")
 
-    print("🤖 Refining chunks + extracting metadata with LLM (Ollama)...")
-    llm = ChatOllama(model=OLLAMA_MODEL, temperature=0.1)
+    print("🤖 Refining chunks + extracting metadata with LLM (Azure OpenAI)...")
+    llm = AzureChatOpenAI(
+        azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
+        api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+        temperature=0.1,
+    )
     refined_chunks = refine_chunks_and_extract_metadata(semantic_chunks, llm)
     print(f"✅ Final refined chunks: {len(refined_chunks)}")
 

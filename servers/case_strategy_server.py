@@ -1,11 +1,19 @@
 from fastmcp import FastMCP
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
-from langchain_community.chat_models import ChatOllama
+from langchain_openai import AzureChatOpenAI
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Initialize MCP and LLM
 mcp = FastMCP("CaseStrategy")
-llm = ChatOllama(model="llama3")
+llm = AzureChatOpenAI(
+    azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+    temperature=0,
+)
 
 # Define the MCP tool
 @mcp.tool()
