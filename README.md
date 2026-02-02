@@ -1,4 +1,4 @@
-# ⚖️ UK Divorce Attorney Assistant (CrewAI + MCP + Streamlit + Ollama)
+# ⚖️ UK Divorce Attorney Assistant (CrewAI + MCP + Streamlit + Azure OpenAI)
 
 <p align="center">
   <img src="title_img.png" width="65%" style="border-radius: 10px;">
@@ -23,7 +23,7 @@ This project is a full-fledged **Legal AI Workflow System** designed to mimic a 
 It leverages:
 - **CrewAI** → for multi-agent orchestration (clause retrieval, case research, strategy analysis, petition drafting)
 - **MCP (Model Context Protocol)** → by Anthropic, for connecting external tools and servers to the LLMs
-- **LLMs (Ollama / Llama 3)** → for reasoning, writing, and decision routing
+- **LLMs (Azure OpenAI GPT-4o)** → for reasoning, writing, and decision routing
 - **Hybrid Retrieval Pipeline** → Dense + Lexical + Metadata search architecture with reranking and query rewriting.
 - **FAISS** → for semantic vector search of legal texts
 - **Pydantic** → for schema validation and safe data transfer in tool interactions
@@ -54,7 +54,7 @@ Together, these components enable natural-language interaction with multiple aut
 | Tool Interface | [Model Context Protocol (MCP)](https://github.com/anthropic/mcp) |
 | Vector Database | FAISS |
 | Embeddings | Sentence-Transformers – BAAI/bge-base-en-v1.5 |
-| Large Language Model | [Ollama – Llama 3](https://ollama.ai/library/llama3) |
+| Large Language Model | [Azure OpenAI – GPT-4o](https://azure.microsoft.com/en-us/products/ai-services/openai-service) |
 | UI | [Streamlit](https://streamlit.io/) |
 | Data Cleaning | Unstructured |
 | Dependency & Env Mgmt | [uv](https://docs.astral.sh/uv/) |
@@ -86,7 +86,7 @@ The system uses a hybrid retrieval approach combining multiple signal types for 
 ###Retrieval Steps
 
 1- Query Rewriting (LLM-based)
-The user’s query is rewritten into a legally detailed and specific version using Llama 3.
+The user's query is rewritten into a legally detailed and specific version using GPT-4o.
 
 2- Hybrid Search (Dense + Lexical + Metadata)
 
@@ -216,7 +216,7 @@ The lawyer inputs a natural query like
 
 **Routing via CrewAI LLM**
 
-The Llama 3 model analyzes the query and routes it to the most appropriate agent through
+The GPT-4o model analyzes the query and routes it to the most appropriate agent through
 route_query_to_agent_llm().
 
 
@@ -257,22 +257,27 @@ uv sync
 
 This installs all dependencies defined under [project.dependencies].
 
-4️⃣ Start Ollama
-``` 
-ollama serve
-ollama pull llama3
-``` 
+4️⃣ Configure Azure OpenAI
+
+Create a `.env` file in the project root with your Azure OpenAI credentials:
+```
+AZURE_OPENAI_API_KEY=<your-api-key>
+AZURE_OPENAI_ENDPOINT=<your-endpoint-url>
+AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4o
+AZURE_OPENAI_API_VERSION=2024-02-15-preview
+TAVILY_API_KEY=<your-tavily-api-key>
+```
 
 5️⃣ Start MCP Servers
 
 In separate terminals, run:
 
-``` 
-uv run python servers/clause_template_server.py
-uv run python servers/case_research_template_server.py
-uv run python servers/strategy_template_server.py
+```
+uv run python servers/clause_retrieval_server.py
+uv run python servers/case_retrieval_server.py
+uv run python servers/case_strategy_server.py
 uv run python servers/petition_template_server.py
-``` 
+```
 
 6️⃣ Launch Streamlit Interface
 ``` 
